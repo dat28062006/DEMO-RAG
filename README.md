@@ -2,6 +2,8 @@
 
 Demo hỏi đáp tri thức nội bộ có phân quyền theo tổ chức, quản lý phiên bản và trích dẫn nguồn.
 
+**Demo online:** [demo-rag-tavu.onrender.com](https://demo-rag-tavu.onrender.com/) — mở bằng trình duyệt, không cần cài ứng dụng. Bản Render Free có thể cần chờ khởi động sau thời gian không truy cập; dữ liệu thay đổi trên demo không được lưu bền vững.
+
 ## Deploy demo miễn phí, không cần giữ máy cá nhân bật
 
 [Tạo web service trên Render từ repo này](https://render.com/deploy?repo=https://github.com/dat28062006/DEMO-RAG).
