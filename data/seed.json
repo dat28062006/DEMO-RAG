@@ -1,0 +1,963 @@
+{
+  "revision": "mission2-hierarchical-review-1",
+  "organizations": [
+    {
+      "id": "GROUP",
+      "name": "Tập đoàn Demo",
+      "parent_id": null,
+      "level": "group"
+    },
+    {
+      "id": "A",
+      "name": "Công ty A",
+      "parent_id": "GROUP",
+      "level": "company"
+    },
+    {
+      "id": "B",
+      "name": "Công ty B",
+      "parent_id": "GROUP",
+      "level": "company"
+    },
+    {
+      "id": "A_OPS",
+      "name": "Vận hành A",
+      "parent_id": "A",
+      "level": "department"
+    },
+    {
+      "id": "A_HR",
+      "name": "Nhân sự A",
+      "parent_id": "A",
+      "level": "department"
+    },
+    {
+      "id": "B_SALES",
+      "name": "Kinh doanh B",
+      "parent_id": "B",
+      "level": "department"
+    },
+    {
+      "id": "A_ADMIN",
+      "name": "Hành chính A",
+      "parent_id": "A",
+      "level": "department"
+    }
+  ],
+  "users": [
+    {
+      "id": "U01",
+      "name": "An",
+      "company_id": "A",
+      "department_id": "A_OPS",
+      "role": "employee",
+      "groups": [
+        "PUBLIC",
+        "A_STAFF",
+        "A_OPS"
+      ],
+      "description": "Áp dụng ngoại lệ Vận hành A"
+    },
+    {
+      "id": "U02",
+      "name": "Bình",
+      "company_id": "B",
+      "department_id": "B_SALES",
+      "role": "employee",
+      "groups": [
+        "PUBLIC",
+        "B_STAFF"
+      ],
+      "description": "Áp dụng quy định tập đoàn"
+    },
+    {
+      "id": "U03",
+      "name": "Chi",
+      "company_id": "A",
+      "department_id": "A_HR",
+      "role": "hr",
+      "groups": [
+        "PUBLIC",
+        "A_STAFF",
+        "B_STAFF",
+        "A_HR"
+      ],
+      "description": "Đọc rộng, quyền lợi theo đơn vị A"
+    },
+    {
+      "id": "U04",
+      "name": "Dũng",
+      "company_id": "GROUP",
+      "department_id": null,
+      "role": "chairman",
+      "groups": [
+        "PUBLIC",
+        "GROUP_LEADERS"
+      ],
+      "description": "Chủ tịch tập đoàn; quyền đọc tài liệu tổ chức của tập đoàn và công ty con được cấp rõ trong DB"
+    },
+    {
+      "id": "U05",
+      "name": "Mai",
+      "company_id": null,
+      "department_id": null,
+      "role": "employee",
+      "groups": [
+        "PUBLIC"
+      ],
+      "description": "Hồ sơ chưa đủ bối cảnh"
+    },
+    {
+      "id": "U06",
+      "name": "Hà",
+      "company_id": "A",
+      "department_id": "A_HR",
+      "role": "it_security",
+      "groups": [
+        "PUBLIC",
+        "A_STAFF",
+        "B_STAFF",
+        "A_OPS",
+        "A_HR"
+      ],
+      "description": "IT/an ninh; được chỉnh ACL trong phạm vi tài liệu được phép"
+    },
+    {
+      "id": "U07",
+      "name": "Lan",
+      "company_id": "A",
+      "department_id": "A_ADMIN",
+      "role": "employee",
+      "groups": [
+        "PUBLIC",
+        "A_STAFF"
+      ],
+      "description": "Nhân viên Hành chính A; chính sách chung công ty A, không có ngoại lệ Vận hành"
+    },
+    {
+      "id": "U08",
+      "name": "Minh",
+      "company_id": "A",
+      "department_id": null,
+      "role": "company_director",
+      "groups": [
+        "PUBLIC",
+        "A_STAFF"
+      ],
+      "description": "Quản lý và duyệt trong phạm vi đơn vị được cấp từ database"
+    },
+    {
+      "id": "U09",
+      "name": "Hùng",
+      "company_id": "A",
+      "department_id": "A_OPS",
+      "role": "department_head",
+      "groups": [
+        "PUBLIC",
+        "A_STAFF",
+        "A_OPS"
+      ],
+      "description": "Quản lý và duyệt trong phạm vi đơn vị được cấp từ database"
+    },
+    {
+      "id": "U10",
+      "name": "Linh",
+      "company_id": "B",
+      "department_id": null,
+      "role": "company_director",
+      "groups": [
+        "PUBLIC",
+        "B_STAFF"
+      ],
+      "description": "Quản lý và duyệt trong phạm vi đơn vị được cấp từ database"
+    },
+    {
+      "id": "U11",
+      "name": "Nam",
+      "company_id": "B",
+      "department_id": "B_SALES",
+      "role": "department_head",
+      "groups": [
+        "PUBLIC",
+        "B_STAFF",
+        "B_SALES"
+      ],
+      "description": "Quản lý và duyệt trong phạm vi đơn vị được cấp từ database"
+    },
+    {
+      "id": "U12",
+      "name": "Ngọc",
+      "company_id": "A",
+      "department_id": "A_HR",
+      "role": "department_head",
+      "groups": [
+        "PUBLIC",
+        "A_STAFF",
+        "A_HR"
+      ],
+      "description": "Quản lý và duyệt trong phạm vi đơn vị được cấp từ database"
+    },
+    {
+      "id": "U13",
+      "name": "Tâm",
+      "company_id": "A",
+      "department_id": "A_ADMIN",
+      "role": "department_head",
+      "groups": [
+        "PUBLIC",
+        "A_STAFF",
+        "A_ADMIN"
+      ],
+      "description": "Quản lý và duyệt trong phạm vi đơn vị được cấp từ database"
+    }
+  ],
+  "organization_read_bindings": [
+    {
+      "subject": "role:chairman",
+      "organization_id": "GROUP",
+      "include_descendants": true,
+      "effect": "allow"
+    },
+    {
+      "subject": "user:U08",
+      "organization_id": "A",
+      "include_descendants": true,
+      "effect": "allow"
+    },
+    {
+      "subject": "user:U09",
+      "organization_id": "A_OPS",
+      "include_descendants": true,
+      "effect": "allow"
+    },
+    {
+      "subject": "user:U10",
+      "organization_id": "B",
+      "include_descendants": true,
+      "effect": "allow"
+    },
+    {
+      "subject": "user:U11",
+      "organization_id": "B_SALES",
+      "include_descendants": true,
+      "effect": "allow"
+    },
+    {
+      "subject": "user:U12",
+      "organization_id": "A_HR",
+      "include_descendants": true,
+      "effect": "allow"
+    },
+    {
+      "subject": "user:U13",
+      "organization_id": "A_ADMIN",
+      "include_descendants": true,
+      "effect": "allow"
+    }
+  ],
+  "role_bindings": [
+    {
+      "subject": "role:it_security",
+      "action": "system.configure_llm",
+      "effect": "allow",
+      "scope_company": null
+    },
+    {
+      "subject": "group:PUBLIC",
+      "action": "query.ask",
+      "effect": "allow",
+      "scope_company": null
+    },
+    {
+      "subject": "group:PUBLIC",
+      "action": "feedback.submit",
+      "effect": "allow",
+      "scope_company": null
+    },
+    {
+      "subject": "user:U03",
+      "action": "document.catalog",
+      "effect": "allow",
+      "scope_company": "A"
+    },
+    {
+      "subject": "user:U03",
+      "action": "document.approve",
+      "effect": "allow",
+      "scope_company": "A"
+    },
+    {
+      "subject": "user:U04",
+      "action": "document.catalog",
+      "effect": "allow",
+      "scope_company": "GROUP",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U04",
+      "action": "document.create_version",
+      "effect": "allow",
+      "scope_company": "GROUP",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U04",
+      "action": "document.publish",
+      "effect": "allow",
+      "scope_company": "GROUP",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U04",
+      "action": "document.withdraw",
+      "effect": "allow",
+      "scope_company": "GROUP",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U06",
+      "action": "document.catalog",
+      "effect": "allow",
+      "scope_company": null
+    },
+    {
+      "subject": "user:U06",
+      "action": "acl.manage",
+      "effect": "allow",
+      "scope_company": null
+    },
+    {
+      "subject": "user:U06",
+      "action": "audit.read",
+      "effect": "allow",
+      "scope_company": null
+    },
+    {
+      "subject": "user:U06",
+      "action": "feedback.review",
+      "effect": "allow",
+      "scope_company": null
+    },
+    {
+      "subject": "user:U08",
+      "action": "document.catalog",
+      "effect": "allow",
+      "scope_company": "A",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U08",
+      "action": "audit.read",
+      "effect": "allow",
+      "scope_company": "A",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U08",
+      "action": "document.create_version",
+      "effect": "allow",
+      "scope_company": "A",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U08",
+      "action": "document.manage_scope",
+      "effect": "allow",
+      "scope_company": "A",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U08",
+      "action": "document.review_company",
+      "effect": "allow",
+      "scope_company": "A",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U08",
+      "action": "document.publish",
+      "effect": "allow",
+      "scope_company": "A",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U08",
+      "action": "document.withdraw",
+      "effect": "allow",
+      "scope_company": "A",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U08",
+      "action": "acl.manage",
+      "effect": "allow",
+      "scope_company": "A",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U09",
+      "action": "document.catalog",
+      "effect": "allow",
+      "scope_company": "A_OPS",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U09",
+      "action": "audit.read",
+      "effect": "allow",
+      "scope_company": "A_OPS",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U09",
+      "action": "document.create_version",
+      "effect": "allow",
+      "scope_company": "A_OPS",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U09",
+      "action": "document.manage_scope",
+      "effect": "allow",
+      "scope_company": "A_OPS",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U09",
+      "action": "document.review_department",
+      "effect": "allow",
+      "scope_company": "A_OPS",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U09",
+      "action": "document.publish",
+      "effect": "allow",
+      "scope_company": "A_OPS",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U09",
+      "action": "document.withdraw",
+      "effect": "allow",
+      "scope_company": "A_OPS",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U10",
+      "action": "document.catalog",
+      "effect": "allow",
+      "scope_company": "B",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U10",
+      "action": "audit.read",
+      "effect": "allow",
+      "scope_company": "B",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U10",
+      "action": "document.create_version",
+      "effect": "allow",
+      "scope_company": "B",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U10",
+      "action": "document.manage_scope",
+      "effect": "allow",
+      "scope_company": "B",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U10",
+      "action": "document.review_company",
+      "effect": "allow",
+      "scope_company": "B",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U10",
+      "action": "document.publish",
+      "effect": "allow",
+      "scope_company": "B",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U10",
+      "action": "document.withdraw",
+      "effect": "allow",
+      "scope_company": "B",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U10",
+      "action": "acl.manage",
+      "effect": "allow",
+      "scope_company": "B",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U11",
+      "action": "document.catalog",
+      "effect": "allow",
+      "scope_company": "B_SALES",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U11",
+      "action": "audit.read",
+      "effect": "allow",
+      "scope_company": "B_SALES",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U11",
+      "action": "document.create_version",
+      "effect": "allow",
+      "scope_company": "B_SALES",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U11",
+      "action": "document.manage_scope",
+      "effect": "allow",
+      "scope_company": "B_SALES",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U11",
+      "action": "document.review_department",
+      "effect": "allow",
+      "scope_company": "B_SALES",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U11",
+      "action": "document.publish",
+      "effect": "allow",
+      "scope_company": "B_SALES",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U11",
+      "action": "document.withdraw",
+      "effect": "allow",
+      "scope_company": "B_SALES",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U12",
+      "action": "document.catalog",
+      "effect": "allow",
+      "scope_company": "A_HR",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U12",
+      "action": "audit.read",
+      "effect": "allow",
+      "scope_company": "A_HR",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U12",
+      "action": "document.create_version",
+      "effect": "allow",
+      "scope_company": "A_HR",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U12",
+      "action": "document.manage_scope",
+      "effect": "allow",
+      "scope_company": "A_HR",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U12",
+      "action": "document.review_department",
+      "effect": "allow",
+      "scope_company": "A_HR",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U12",
+      "action": "document.publish",
+      "effect": "allow",
+      "scope_company": "A_HR",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U12",
+      "action": "document.withdraw",
+      "effect": "allow",
+      "scope_company": "A_HR",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U13",
+      "action": "document.catalog",
+      "effect": "allow",
+      "scope_company": "A_ADMIN",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U13",
+      "action": "audit.read",
+      "effect": "allow",
+      "scope_company": "A_ADMIN",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U13",
+      "action": "document.create_version",
+      "effect": "allow",
+      "scope_company": "A_ADMIN",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U13",
+      "action": "document.manage_scope",
+      "effect": "allow",
+      "scope_company": "A_ADMIN",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U13",
+      "action": "document.review_department",
+      "effect": "allow",
+      "scope_company": "A_ADMIN",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U13",
+      "action": "document.publish",
+      "effect": "allow",
+      "scope_company": "A_ADMIN",
+      "include_descendants": true
+    },
+    {
+      "subject": "user:U13",
+      "action": "document.withdraw",
+      "effect": "allow",
+      "scope_company": "A_ADMIN",
+      "include_descendants": true
+    },
+    {
+      "subject": "role:chairman",
+      "action": "document.approve",
+      "effect": "allow",
+      "scope_company": "GROUP",
+      "include_descendants": true
+    },
+    {
+      "subject": "role:chairman",
+      "action": "document.override_review",
+      "effect": "allow",
+      "scope_company": "GROUP",
+      "include_descendants": true
+    },
+    {
+      "subject": "role:chairman",
+      "action": "document.review_company",
+      "effect": "allow",
+      "scope_company": "GROUP",
+      "include_descendants": true
+    },
+    {
+      "subject": "role:chairman",
+      "action": "document.review_department",
+      "effect": "allow",
+      "scope_company": "GROUP",
+      "include_descendants": true
+    },
+    {
+      "subject": "role:chairman",
+      "action": "document.manage_scope",
+      "effect": "allow",
+      "scope_company": "GROUP",
+      "include_descendants": true
+    },
+    {
+      "subject": "role:chairman",
+      "action": "document.read_all",
+      "effect": "allow",
+      "scope_company": "GROUP",
+      "include_descendants": true
+    },
+    {
+      "subject": "role:chairman",
+      "action": "acl.manage",
+      "effect": "allow",
+      "scope_company": "GROUP",
+      "include_descendants": true
+    },
+    {
+      "subject": "role:chairman",
+      "action": "audit.read",
+      "effect": "allow",
+      "scope_company": "GROUP",
+      "include_descendants": true
+    },
+    {
+      "subject": "role:chairman",
+      "action": "feedback.review",
+      "effect": "allow",
+      "scope_company": "GROUP",
+      "include_descendants": true
+    },
+    {
+      "subject": "role:chairman",
+      "action": "system.configure_llm",
+      "effect": "allow",
+      "scope_company": "GROUP",
+      "include_descendants": true
+    }
+  ],
+  "documents": [
+    {
+      "id": "D01",
+      "title": "Hỗ trợ ăn tối tập đoàn",
+      "version": "1",
+      "section": "Điều 3",
+      "policy_key": "meal",
+      "source_path": "D01.md",
+      "effective_from": "2026-01-01",
+      "effective_to": "2026-08-31",
+      "applies_company": null,
+      "applies_department": null,
+      "applies_role": null,
+      "required": true,
+      "allow": [
+        "PUBLIC"
+      ],
+      "deny": []
+    },
+    {
+      "id": "D02",
+      "title": "Hỗ trợ ăn tối tập đoàn",
+      "version": "2",
+      "section": "Điều 3",
+      "policy_key": "meal",
+      "source_path": "D02.md",
+      "effective_from": "2026-09-01",
+      "effective_to": null,
+      "applies_company": null,
+      "applies_department": null,
+      "applies_role": null,
+      "required": true,
+      "allow": [
+        "PUBLIC"
+      ],
+      "deny": []
+    },
+    {
+      "id": "D03",
+      "title": "Hỗ trợ ăn tối công ty A",
+      "version": "1",
+      "section": "Điều 2",
+      "policy_key": "meal",
+      "source_path": "D03.md",
+      "effective_from": "2026-09-01",
+      "effective_to": null,
+      "applies_company": "A",
+      "applies_department": null,
+      "applies_role": null,
+      "required": true,
+      "allow": [
+        "A_STAFF"
+      ],
+      "deny": []
+    },
+    {
+      "id": "D04",
+      "title": "Ngoại lệ hỗ trợ ăn tối Vận hành A",
+      "version": "1",
+      "section": "Điều 1",
+      "policy_key": "meal",
+      "source_path": "D04.md",
+      "effective_from": "2026-09-15",
+      "effective_to": null,
+      "applies_company": "A",
+      "applies_department": "A_OPS",
+      "applies_role": null,
+      "required": true,
+      "allow": [
+        "A_OPS",
+        "A_HR"
+      ],
+      "deny": []
+    },
+    {
+      "id": "D05",
+      "title": "Làm việc từ xa công ty B - nguồn X",
+      "version": "1",
+      "section": "Điều 4",
+      "policy_key": "remote",
+      "source_path": "D05.md",
+      "effective_from": "2026-09-01",
+      "effective_to": null,
+      "applies_company": "B",
+      "applies_department": null,
+      "applies_role": null,
+      "required": true,
+      "allow": [
+        "B_STAFF"
+      ],
+      "deny": []
+    },
+    {
+      "id": "D06",
+      "title": "Làm việc từ xa công ty B - nguồn Y",
+      "version": "1",
+      "section": "Điều 4",
+      "policy_key": "remote",
+      "source_path": "D06.md",
+      "effective_from": "2026-09-01",
+      "effective_to": null,
+      "applies_company": "B",
+      "applies_department": null,
+      "applies_role": null,
+      "required": true,
+      "allow": [
+        "B_STAFF"
+      ],
+      "deny": []
+    },
+    {
+      "id": "D07",
+      "title": "Thưởng lãnh đạo công ty A",
+      "version": "1",
+      "section": "Điều 5",
+      "policy_key": "bonus",
+      "source_path": "D07.md",
+      "effective_from": "2026-01-01",
+      "effective_to": null,
+      "applies_company": "A",
+      "applies_department": null,
+      "applies_role": "leader",
+      "required": true,
+      "allow": [
+        "A_LEADERS"
+      ],
+      "deny": []
+    },
+    {
+      "id": "D08",
+      "title": "Hướng dẫn hỗ trợ ăn tối công ty B",
+      "version": "1",
+      "section": "Mục 1",
+      "policy_key": "meal",
+      "source_path": "D08.md",
+      "effective_from": "2026-09-01",
+      "effective_to": null,
+      "applies_company": "B",
+      "applies_department": null,
+      "applies_role": null,
+      "required": false,
+      "allow": [
+        "B_STAFF"
+      ],
+      "deny": []
+    },
+    {
+      "id": "D09",
+      "title": "Phạm vi thử nghiệm",
+      "version": "1",
+      "section": "Mục 1",
+      "policy_key": "scope",
+      "source_path": "D09.md",
+      "effective_from": "2026-01-01",
+      "effective_to": null,
+      "applies_company": null,
+      "applies_department": null,
+      "applies_role": null,
+      "required": false,
+      "allow": [
+        "PUBLIC"
+      ],
+      "deny": []
+    },
+    {
+      "id": "D10",
+      "title": "Điều kiện xác nhận ca làm thêm",
+      "version": "1",
+      "section": "Điều 1",
+      "policy_key": "meal",
+      "source_path": "D10.md",
+      "effective_from": "2026-01-01",
+      "effective_to": null,
+      "applies_company": null,
+      "applies_department": null,
+      "applies_role": null,
+      "required": false,
+      "allow": [
+        "PUBLIC"
+      ],
+      "deny": []
+    },
+    {
+      "id": "D11",
+      "title": "Làm việc từ xa công ty A - dự thảo",
+      "version": "1",
+      "section": "Điều 1",
+      "policy_key": "remote",
+      "source_path": "D11.md",
+      "effective_from": "2026-10-01",
+      "effective_to": null,
+      "applies_company": "A",
+      "applies_department": null,
+      "applies_role": null,
+      "required": true,
+      "allow": [
+        "A_STAFF"
+      ],
+      "deny": [],
+      "status": "staging",
+      "approval": "pending"
+    }
+  ],
+  "relations": [
+    {
+      "source_id": "D02",
+      "target_id": "D01",
+      "type": "supersedes",
+      "approved": true
+    },
+    {
+      "source_id": "D03",
+      "target_id": "D02",
+      "type": "overrides",
+      "approved": true
+    },
+    {
+      "source_id": "D04",
+      "target_id": "D03",
+      "type": "overrides",
+      "approved": true
+    }
+  ],
+  "roles": [
+    {
+      "id": "company_director",
+      "name": "Giám đốc công ty"
+    },
+    {
+      "id": "department_head",
+      "name": "Trưởng phòng"
+    }
+  ],
+  "organization_review_policies": [
+    {
+      "organization_id": "A",
+      "enabled": true
+    },
+    {
+      "organization_id": "B",
+      "enabled": true
+    }
+  ]
+}

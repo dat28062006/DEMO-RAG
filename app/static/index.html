@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RAG · Hỏi đáp nội bộ</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <a class="brand" href="/"
+        ><span class="brand-icon">✳</span> RAG <span class="small-tag">MVP</span></a
+      >
+      <button class="nav-button" id="new-chat"><span>＋</span> Cuộc trò chuyện mới</button>
+      <button class="nav-button active" id="nav-chat"><span>◉</span> Hỏi đáp</button>
+      <button class="nav-button" id="nav-library"><span>▤</span> Tài liệu được phép đọc</button>
+      <div class="nav-label" id="tools-label" hidden>CÔNG CỤ ĐƯỢC CẤP QUYỀN</div>
+      <button class="nav-button" id="nav-manage" hidden>
+        <span>▣</span> Quản lý & duyệt tài liệu
+      </button>
+      <button class="nav-button" id="nav-reports" hidden><span>⚑</span> Report & cải thiện</button>
+      <button class="nav-button" id="open-llm" hidden><span>⚙</span> Cấu hình LLM</button>
+      <div class="sidebar-divider"></div>
+      <div class="nav-label">CUỘC TRÒ CHUYỆN HIỆN TẠI</div>
+      <div id="conversation-title" class="conversation-title">Chưa có câu hỏi</div>
+      <div class="sidebar-bottom">
+        <strong>Đúng người. Đúng nguồn.</strong>
+        <p>Quyền đọc, phạm vi áp dụng và quyền thao tác được kiểm tra riêng.</p>
+        <span class="demo-label">Dữ liệu & danh tính giả lập</span>
+      </div>
+    </aside>
+    <main>
+      <header class="topbar">
+        <div>
+          <span class="app-title">RAG</span
+          ><span class="mode-tag" id="mode-label">Đang tải cấu hình</span>
+        </div>
+        <label class="profile-control"
+          >Hồ sơ mô phỏng
+          <select id="profile-select" aria-label="Chọn hồ sơ giả lập"></select
+        ></label>
+      </header>
+      <div id="context-bar" class="context-bar"></div>
+      <div id="error-message" class="notice error" hidden role="alert"></div>
+      <div id="success-message" class="notice success" hidden role="status"></div>
+      <section id="chat-view" class="chat-view">
+        <div id="greeting" class="greeting">
+          <span class="greeting-icon">✳</span>
+          <h1>Bạn muốn tìm hiểu điều gì?</h1>
+          <p>
+            Hỏi về quy định nội bộ. Mỗi kết luận đều cần nguồn phù hợp với bối cảnh và quyền của
+            bạn.
+          </p>
+          <div class="suggestions">
+            <button data-question="Nếu làm thêm sau 20 giờ, tôi được hỗ trợ tiền ăn bao nhiêu?">
+              <span>◷</span> Hỗ trợ khi làm thêm</button
+            ><button data-question="Tôi được làm việc từ xa mấy ngày mỗi tuần?">
+              <span>⌂</span> Quy định làm việc từ xa</button
+            ><button data-question="Chế độ thai sản của tôi thế nào?">
+              <span>◇</span> Thử khi kho thiếu dữ liệu
+            </button>
+          </div>
+        </div>
+        <div id="thread" class="thread" aria-live="polite"></div>
+        <div class="composer-area">
+          <form id="ask-form" class="composer">
+            <label class="sr-only" for="question">Nhập câu hỏi</label
+            ><textarea
+              id="question"
+              rows="1"
+              maxlength="4000"
+              required
+              placeholder="Hỏi điều bạn cần biết…"
+            ></textarea>
+            <div class="composer-bottom">
+              <label class="date-label"
+                >Ngày áp dụng <input id="as-of" type="date" value="2026-10-01" required /></label
+              ><button id="compare-button" type="button" class="compare-button">
+                So sánh An / Bình</button
+              ><button id="ask-button" type="submit" class="send-button" aria-label="Gửi câu hỏi">
+                ↑
+              </button>
+            </div>
+          </form>
+          <p class="composer-note">
+            Không đủ căn cứ thì hỏi thêm hoặc từ chối. Hãy mở nguồn để kiểm chứng câu trả lời.
+          </p>
+        </div>
+      </section>
+      <section id="library-view" class="workspace-view" hidden>
+        <div class="view-heading">
+          <h1>Tài liệu được phép đọc</h1>
+          <p>
+            Giữ nguồn lịch sử để đối chiếu. Hỏi đáp chỉ dùng nguồn đúng hiệu lực tại ngày tra cứu và
+            quyền hiện hành.
+          </p>
+          <label>Ngày tra cứu <input id="library-date" type="date" /></label>
+        </div>
+        <div id="library-list" class="library-grid"></div>
+      </section>
+      <section id="manage-view" class="workspace-view" hidden>
+        <div class="view-heading">
+          <h1>Quản lý & duyệt tài liệu</h1>
+          <p>Chức năng hiện theo từng quyền được cấp và phạm vi tài liệu.</p>
+          <button id="open-import" type="button" class="action-button" hidden>
+            Import tài liệu
+          </button>
+        </div>
+        <div class="manage-grid">
+          <div class="document-list-panel">
+            <label class="sr-only" for="document-search">Tìm tài liệu</label
+            ><input
+              id="document-search"
+              class="search-input"
+              placeholder="Tìm theo tên, mã tài liệu…"
+            />
+            <div id="document-list"></div>
+          </div>
+          <div id="document-detail" class="document-detail">
+            <div class="empty-panel">Chọn tài liệu để đọc và xem các thao tác được phép.</div>
+          </div>
+        </div>
+      </section>
+      <section id="reports-view" class="workspace-view" hidden>
+        <div class="view-heading">
+          <h1>Report & cải thiện</h1>
+          <p>
+            Context được lưu tại thời điểm xử lý để tái hiện lỗi. Chỉ người có quyền mới xem được.
+          </p>
+        </div>
+        <div id="reports-list"></div>
+      </section>
+    </main>
+    <dialog id="llm-dialog">
+      <div class="dialog-header">
+        <span>Cấu hình LLM</span
+        ><button id="close-llm" type="button" aria-label="Đóng cấu hình LLM">×</button>
+      </div>
+      <h2>Dùng API để kiểm thử</h2>
+      <p id="llm-status" class="muted" role="status"></p>
+      <p>
+        Embedding vẫn dùng Qwen local. Nhà cung cấp được chọn nhận câu hỏi và các đoạn nguồn đã qua
+        kiểm tra quyền, phiên bản và hiệu lực để sinh đáp án và kiểm chứng.
+      </p>
+      <form id="llm-form" autocomplete="off">
+        <label
+          >Nhà cung cấp API<select id="llm-provider">
+            <option value="groq">Groq</option>
+            <option value="openai">OpenAI</option>
+          </select></label
+        >
+        <label
+          >Model<input id="llm-model" value="openai/gpt-oss-120b" maxlength="100" required
+        /></label>
+        <label
+          ><span id="llm-key-title">Groq API key</span
+          ><input
+            id="llm-key"
+            type="password"
+            autocomplete="new-password"
+            maxlength="512"
+            placeholder="Nhập key trực tiếp ở đây"
+            required
+        /></label>
+        <p class="muted">
+          Key chỉ giữ trong bộ nhớ server, không lưu vào database, trình duyệt hay report. Khởi động
+          lại server cần nhập lại.
+        </p>
+        <label class="acl-row"
+          ><input id="llm-consent" type="checkbox" required /><span id="llm-consent-label"
+            >Cho phép gửi câu hỏi và đoạn tài liệu được quyền đọc tới Groq. Free Plan có giới hạn
+            lượt/token.</span
+          ></label
+        >
+        <p id="llm-error" role="alert" hidden></p>
+        <button id="activate-api" class="primary-button" type="submit">
+          Kiểm tra kết nối &amp; dùng Groq
+        </button>
+        <button id="use-local" class="action-button secondary" type="button">
+          Dùng lại model local
+        </button>
+      </form>
+    </dialog>
+    <dialog id="import-dialog">
+      <div class="dialog-header">
+        <span>Import tài liệu</span
+        ><button id="close-import" type="button" aria-label="Đóng import">×</button>
+      </div>
+      <h2>Nhập tài liệu PDF hoặc Word</h2>
+      <p class="muted">
+        Hỗ trợ PDF có lớp văn bản và Word .docx, tối đa 2 MB. Giữ file gốc và trích văn bản để
+        đọc/kiểm chứng. File scan cần OCR; Word .doc cũ cần chuyển sang .docx. Gói JSON mẫu vẫn được
+        hỗ trợ.
+      </p>
+      <form id="import-form">
+        <label
+          >File tài liệu<input id="import-file" type="file" accept=".pdf,.docx,.json" required
+        /></label>
+        <div id="import-metadata" hidden>
+          <label
+            >Tên tài liệu<input
+              id="import-title"
+              maxlength="200"
+              placeholder="Tên để tìm trong kho"
+          /></label>
+          <label
+            >Chủ đề<select id="import-topic">
+              <option value="general">Tài liệu chung để đọc</option>
+              <option value="leave">Nghỉ phép năm</option>
+              <option value="meal">Hỗ trợ tiền ăn</option>
+              <option value="remote">Làm việc từ xa</option>
+              <option value="bonus">Thưởng</option>
+            </select></label
+          >
+          <p class="muted">
+            Import tạo chỉ mục semantic parent–child và embedding local. Tài liệu chỉ phục vụ hỏi
+            đáp sau khi duyệt, công bố, có hiệu lực và chỉ mục sẵn sàng.
+          </p>
+          <div class="import-grid">
+            <label>Phạm vi áp dụng<select id="import-company"></select></label
+            ><label>Phòng ban áp dụng<select id="import-department"></select></label>
+          </div>
+          <label
+            >Chức danh áp dụng<select id="import-role">
+              <option value="">Mọi chức danh trong phạm vi</option>
+            </select></label
+          >
+          <div class="import-grid">
+            <label>Hiệu lực từ<input id="import-from" type="date" value="2026-01-01" /></label
+            ><label>Hiệu lực đến (không bắt buộc)<input id="import-to" type="date" /></label>
+          </div>
+          <label>Phiên bản<input id="import-version" value="1" maxlength="32" /></label>
+          <div id="import-leave" hidden>
+            <label
+              >Loại nguồn nghỉ phép<select id="import-kind">
+                <option value="entitlement">Chính sách số ngày được nghỉ</option>
+                <option value="usage">Lịch sử số ngày đã nghỉ</option>
+                <option value="balance">Xác nhận số dư còn lại</option>
+              </select></label
+            >
+            <p class="muted">
+              Để trích số ngày, nguồn cần một dòng rõ ràng theo dạng “Số ngày được nghỉ: 12
+              ngày/năm”, “Số ngày đã nghỉ: 5 ngày” hoặc “Số ngày còn lại: 7 ngày”. Số liệu phải có
+              trong file.
+            </p>
+            <div id="import-personal" hidden>
+              <label>Chủ hồ sơ cá nhân<select id="import-subject"></select></label>
+              <div class="import-grid">
+                <label
+                  >Kỳ dữ liệu từ<input
+                    id="import-period-from"
+                    type="date"
+                    value="2026-01-01" /></label
+                ><label
+                  >Kỳ dữ liệu đến<input id="import-period-to" type="date" value="2026-10-01"
+                /></label>
+              </div>
+            </div>
+          </div>
+          <p class="muted">
+            Cấp quyền đọc theo công ty, phòng ban hoặc từng nhân sự. Chọn một công ty/phòng là cấp
+            cho toàn bộ nhân sự thuộc đơn vị đó; bỏ chọn cấp cha nếu chỉ muốn vài người. Người duyệt
+            cũng cần được cấp đọc. Tác giả được quản lý bản nháp, không tự có quyền đọc bản công bố.
+          </p>
+          <div id="import-readers"></div>
+        </div>
+        <p id="import-error" role="alert" hidden></p>
+        <button id="submit-import" type="submit" class="primary-button">
+          Import vào kho chờ duyệt
+        </button>
+      </form>
+    </dialog>
+    <dialog id="source-dialog">
+      <div class="dialog-header">
+        <span>Nguồn kiểm chứng</span
+        ><button id="close-source" type="button" aria-label="Đóng nguồn">×</button>
+      </div>
+      <h2 id="source-title"></h2>
+      <div id="source-meta" class="muted"></div>
+      <a id="source-original" class="action-button" download hidden>Tải file gốc</a>
+      <button id="source-full" class="action-button secondary" type="button" hidden>
+        Mở toàn bộ tài liệu
+      </button>
+      <p id="source-highlight-note" class="muted" hidden></p>
+      <pre id="source-text"></pre>
+      <p class="dialog-note">
+        Nguồn được kiểm quyền hiện hành khi mở. Dữ liệu seed và mẫu là giả lập; file người dùng nhập
+        giữ nguyên nội dung gốc. Phần hiển thị là văn bản trích xuất.
+      </p>
+    </dialog>
+    <dialog id="report-dialog">
+      <div class="dialog-header">
+        <span>Báo lỗi câu trả lời</span
+        ><button id="close-report" type="button" aria-label="Đóng báo lỗi">×</button>
+      </div>
+      <h2>Giúp cải thiện câu trả lời</h2>
+      <p class="muted">
+        Report lưu hội thoại của hồ sơ này, bối cảnh, nguồn đã dùng, trace và cấu hình xử lý từ
+        server. Lượt dùng LLM lưu prompt, nguồn được cấp, output và revision model; lượt tra cứu
+        trực tiếp ghi rõ chế độ xử lý.
+      </p>
+      <form id="report-form">
+        <label
+          >Loại lỗi<select id="report-category">
+            <option value="wrong_answer">Câu trả lời sai / chưa phù hợp</option>
+            <option value="missing_source">Nguồn thiếu / trích dẫn sai</option>
+            <option value="permission">Vấn đề quyền truy cập</option>
+            <option value="other">Lỗi khác</option>
+          </select></label
+        ><label
+          >Mô tả lỗi<textarea
+            id="report-description"
+            rows="4"
+            maxlength="4000"
+            required
+            placeholder="Bạn kỳ vọng điều gì? Câu trả lời sai ở đâu?"
+          ></textarea></label
+        ><button class="primary-button" type="submit" id="submit-report">
+          Gửi report và lưu context
+        </button>
+      </form>
+    </dialog>
+    <dialog id="version-dialog">
+      <div class="dialog-header">
+        <span>Chỉnh sửa qua phiên bản mới</span
+        ><button id="close-version" type="button" aria-label="Đóng tạo phiên bản">×</button>
+      </div>
+      <h2 id="version-title"></h2>
+      <p class="muted">
+        Bản sửa phải duyệt và công bố lại. Giữ bản gốc, phạm vi và quyền đọc; bản mới chứa văn bản
+        chỉnh sửa, không giả là PDF/Word gốc đã được sửa.
+      </p>
+      <form id="version-form">
+        <label>Tên tài liệu<input id="version-name" maxlength="200" required /></label
+        ><label>Ngày bắt đầu hiệu lực<input id="version-date" type="date" required /></label
+        ><label
+          >Ngày hết hiệu lực (để trống nếu không giới hạn)<input
+            id="version-end"
+            type="date" /></label
+        ><label
+          >Nội dung mục / điều<textarea
+            id="version-body"
+            rows="8"
+            maxlength="58000"
+            required
+          ></textarea></label
+        ><button class="primary-button" type="submit">Lưu thành bản chờ duyệt</button>
+      </form>
+    </dialog>
+  </body>
+</html>
