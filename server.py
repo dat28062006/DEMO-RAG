@@ -22,7 +22,25 @@ STATIC = ROOT / "app" / "static"
 LOGGER = logging.getLogger("mission2")
 
 
-def handler_for(engine: KnowledgeEngine):
+def validate_public_origin(value):
+    if value is None:
+        return None
+    parsed = urlsplit(value)
+    if (
+        parsed.scheme != "https"
+        or not parsed.hostname
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.path not in ("", "/")
+        or parsed.query
+        or parsed.fragment
+    ):
+        raise ValueError("Public origin phải là địa chỉ HTTPS, không có path/query hoặc credential.")
+    return value.rstrip("/")
+
+
+def handler_for(engine: KnowledgeEngine, public_origin=None):
+    public_origin = validate_public_origin(public_origin)
     control = ControlService(engine.db_path)
 
     class Handler(BaseHTTPRequestHandler):
@@ -173,9 +191,12 @@ def handler_for(engine: KnowledgeEngine):
                 "/api/llm-settings",
             ) and not path.startswith(("/api/review/documents/", "/api/reports/")):
                 return self.send_data(404, {"error": "Không tìm thấy tài nguyên."})
-            # Reject cross-site browser requests; the demo is intentionally bound to localhost.
+            # Keep localhost checks; allow one explicitly configured HTTPS tunnel origin.
             origin = self.headers.get("Origin")
-            if origin and origin != "http://" + self.headers.get("Host", ""):
+            allowed_origins = {"http://" + self.headers.get("Host", "")}
+            if public_origin:
+                allowed_origins.add(public_origin)
+            if origin and origin not in allowed_origins:
                 return self.send_data(403, {"error": "Nguồn yêu cầu không hợp lệ."})
             try:
                 size = int(self.headers.get("Content-Length", "0"))
@@ -229,13 +250,17 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--db", type=Path, default=DEFAULT_DB)
+    parser.add_argument("--public-origin", help="Exact HTTPS origin allowed for a demo tunnel")
     parser.add_argument(
         "--reset", action="store_true", help="Reset only the selected demo database to fixtures"
     )
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
     initialize(args.db, reset=args.reset)
-    server = ThreadingHTTPServer(("127.0.0.1", args.port), handler_for(KnowledgeEngine(args.db)))
+    public_origin = validate_public_origin(args.public_origin)
+    server = ThreadingHTTPServer(
+        ("127.0.0.1", args.port), handler_for(KnowledgeEngine(args.db), public_origin)
+    )
     from app.hybrid import config_for
 
     configured = config_for(args.db)

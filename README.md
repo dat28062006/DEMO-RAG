@@ -2,6 +2,43 @@
 
 Demo hỏi đáp tri thức nội bộ có phân quyền theo tổ chức, quản lý phiên bản và trích dẫn nguồn.
 
+## Deploy demo miễn phí, không cần giữ máy cá nhân bật
+
+[Tạo web service trên Render từ repo này](https://render.com/deploy?repo=https://github.com/dat28062006/DEMO-RAG).
+
+Repo có `Dockerfile` và `render.yaml` dùng **Render Free**, không tạo database trả phí hoặc persistent disk. Hosting tự build Docker từ GitHub; máy cá nhân **không cần cài/chạy Docker Desktop**.
+
+1. Đăng ký hoặc đăng nhập [Render](https://dashboard.render.com/) bằng tài khoản của bạn.
+2. Mở link deploy phía trên, chọn repo `dat28062006/DEMO-RAG` và tạo Blueprint. Nếu dùng **New → Web Service → Public Git Repository**, nhập URL repo, chọn **Docker**, nhánh `main`, vùng Singapore và **Free**. Dockerfile ở `./Dockerfile`; không điền build/start command Python riêng.
+3. Trong **Environment**, thêm `GROQ_API_KEY` bằng ô secret của Render, và `GROQ_MODEL=openai/gpt-oss-120b`. Không đưa key vào Git, Dockerfile hoặc README. Nếu chưa cấu hình secret, có thể nhập qua **Cấu hình LLM** trên web sau khi deploy; key nhập trên web chỉ có tác dụng đến lần restart tiếp theo.
+4. Đặt **Health Check Path** thành `/api/health`. Giữ port do Render cấp qua biến `PORT`; ứng dụng tự nghe tại `0.0.0.0:$PORT`.
+5. Chọn **Deploy** và chờ log có `Cloud template ready` ở bước build, sau đó `DEMO RAG listening` ở bước chạy. Render cấp link HTTPS dạng `https://<ten-service>.onrender.com`. Gửi **link này** cho người thử; không gửi link dashboard.
+6. Kiểm tra `/api/health`, rồi mở web, chọn An/Bình và hỏi `Quy định hỗ trợ tiền ăn của tôi là gì?`. Import PDF/Word trong **Quản lý & duyệt tài liệu**, duyệt và công bố trước khi hỏi nội dung của tài liệu vừa nhập.
+
+### Bản cloud hoạt động thế nào?
+
+- Khi build, tải model **paraphrase-multilingual-MiniLM-L12-v2 ONNX quantized**, khóa revision và kiểm tra checksum; tạo chỉ mục cho các tài liệu giả lập trong repo. Không tải Qwen hoặc Ollama lên hosting nhỏ.
+- Khi chạy, sao chép database mẫu đã lập chỉ mục sang `runtime/cloud.sqlite3` **nếu chưa có**. Không chép database, file đã import, lịch sử hỏi đáp hoặc key từ máy phát triển.
+- Chunking semantic parent–child, BM25 + dense + RRF, kiểm quyền, hiệu lực, phiên bản và trích dẫn dùng cùng pipeline với bản local. Embedding cloud là 384 chiều; profile local Qwen vẫn giữ 1024 chiều, các chỉ mục không dùng lẫn nhau.
+- Secret `GROQ_API_KEY` được đọc khi khởi động vào bộ nhớ server để mọi phiên demo dùng chung; ứng dụng không lưu giá trị key vào SQLite và không trả key về trình duyệt. Render vẫn lưu secret trong cấu hình hosting để cấp lại sau restart.
+- Tự nhận HTTPS origin từ `RENDER_EXTERNAL_URL`; nếu dùng tên miền riêng, đặt `PUBLIC_ORIGIN=https://ten-mien-cua-ban`. Chỉ thêm chính xác origin cần dùng.
+- Bản cloud xử lý tối đa một yêu cầu ghi/import/hỏi đáp cùng lúc để hạn chế RAM. Nếu đang bận, trả thông báo thử lại.
+
+**Giới hạn Free:** Render có thể đưa service về chế độ ngủ sau 15 phút không truy cập, nên lần mở lại có thể phải chờ khởi động. Filesystem không bền vững: dữ liệu import, sửa quyền, hội thoại và báo lỗi có thể mất khi restart/redeploy/service ngủ; demo trở về dữ liệu mẫu trong image. Đừng dùng bản này làm kho lưu trữ tài liệu. Xem [giới hạn Render Free](https://render.com/docs/free).
+
+Demo hiện dùng **hồ sơ mô phỏng có thể đổi trên giao diện**, chưa có đăng nhập người dùng thật. Chỉ dùng dữ liệu giả lập hoặc tài liệu bạn chấp nhận chia sẻ với người có link demo.
+
+### Chạy profile Docker trên máy có Docker hoạt động
+
+```powershell
+docker build -t demo-rag .
+# Tạo biến GROQ_API_KEY trong terminal bằng cách nhập bí mật trực tiếp.
+# Lệnh dưới truyền giá trị biến vào container, không ghi key vào image.
+docker run --rm -p 8765:10000 -e GROQ_API_KEY demo-rag
+```
+
+Mở `http://127.0.0.1:8765/`. Container không có volume nên dữ liệu mất khi xóa container. Các lệnh cài/chạy Python local dưới đây vẫn dùng profile Qwen như trước.
+
 ## Hướng dẫn chạy ứng dụng
 
 Các lệnh dưới đây dùng **Windows PowerShell**, chạy tại thư mục gốc của repo. Có thể mở terminal trong VS Code hoặc PowerShell thông thường.

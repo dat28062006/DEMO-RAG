@@ -1,5 +1,6 @@
 # Keep the repository source-only.
 /runtime/
+/cloud-assets/
 /tests/
 /evidence/
 /docs/

@@ -1,0 +1,21 @@
+# Only application source and fake fixtures can enter the build context.
+**
+!Dockerfile
+!requirements.txt
+!requirements-cloud.txt
+!server.py
+!app/
+!app/**
+!data/
+!data/seed.json
+!data/sources/
+!data/sources/*.md
+!scripts/
+!scripts/deploy/
+!scripts/deploy/*.py
+**/__pycache__/
+**/*.pyc
+**/.env*
+**/*.sqlite3*
+**/*.pdf
+**/*.docx

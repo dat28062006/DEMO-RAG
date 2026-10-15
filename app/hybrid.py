@@ -77,6 +77,16 @@ def cosine(a, b):
     return max(-1.0, min(1.0, sum(x * y for x, y in zip(a, b))))
 
 
+def encoder_for(config):
+    if config.get("provider", "ollama") == "onnx":
+        from .onnx_encoder import OnnxEncoder
+
+        return OnnxEncoder(config)
+    if config.get("provider", "ollama") != "ollama":
+        raise IndexUnavailable("Embedding provider chưa được hỗ trợ.")
+    return OllamaEncoder(config)
+
+
 class OllamaEncoder:
     def __init__(self, config):
         self.config = config
@@ -333,7 +343,7 @@ def index_document(db, doc, encoder=None):
         children = sentences(doc["section_text"])
         if not children:
             raise IndexUnavailable("Không có câu hợp lệ để lập chỉ mục.")
-        vectors = (encoder or OllamaEncoder(config)).embed([c["text"] for c in children])
+        vectors = (encoder or encoder_for(config)).embed([c["text"] for c in children])
         parents = make_parents(doc, children, vectors, config)
         with connect(db) as conn:
             conn.execute("BEGIN IMMEDIATE")
@@ -479,7 +489,7 @@ class HybridRetriever:
         question, query_changes = normalize_query(
             question, {term for row in rows for term in json.loads(row["terms_json"])}
         )
-        query_vector = (self.encoder or OllamaEncoder(config)).embed([question], query=True)[0]
+        query_vector = (self.encoder or encoder_for(config)).embed([question], query=True)[0]
         dense = {r["id"]: cosine(query_vector, array("f", r["embedding"])) for r in rows}
         sparse = sparse_scores(question, rows)
         dense_order = sorted(dense, key=lambda k: (-dense[k], k))[:40]
